@@ -132,6 +132,24 @@ app.get("/get-userlogin", verifytoken, async (req, res) => {
   };
   res.status(200).json(userDatatoSend);
 });
+app.post("/profileUpdate", verifytoken, async (req, res) => {
+  const userId = req.userId;
+  const { data } = req.body;
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { avatar: data },
+      { new: true }
+    );
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    return res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 app.post("/upvote", verifytoken, async (req, res) => {
   const userId = req.userId;
