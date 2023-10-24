@@ -138,11 +138,8 @@ app.post("/profileUpdate", verifytoken, async (req, res) => {
   const { data } = req.body;
 
   try {
-    const updatedUser = await User.findByIdAndUpdate(userId, { avatar: data });
-    if (!updatedUser) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    return res.status(200).json(updatedUser);
+    await User.findByIdAndUpdate(userId, { avatar: data });
+    return res.status(200).json("Profile Updated Successfully");
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
