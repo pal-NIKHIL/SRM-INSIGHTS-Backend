@@ -134,13 +134,11 @@ app.get("/get-userlogin", verifytoken, async (req, res) => {
 });
 app.post("/profileUpdate", verifytoken, async (req, res) => {
   const userId = req.userId;
+  console.log(req);
   const { data } = req.body;
+
   try {
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { avatar: data },
-      { new: true }
-    );
+    const updatedUser = await User.findByIdAndUpdate(userId, { avatar: data });
     if (!updatedUser) {
       return res.status(404).json({ error: "User not found" });
     }
