@@ -134,7 +134,6 @@ app.get("/get-userlogin", verifytoken, async (req, res) => {
 });
 app.post("/profileUpdate", verifytoken, async (req, res) => {
   const userId = req.userId;
-  console.log(req);
   const { data } = req.body;
 
   try {
