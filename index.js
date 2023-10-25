@@ -142,21 +142,10 @@ app.get("/get-userlogin", verifytoken, async (req, res) => {
 });
 app.post("/profileUpdate", verifytoken, async (req, res) => {
   const userId = req.userId;
+  const avatarUrl = req.body.data;
   try {
-    imagekit
-      .upload({
-        file: req.body.data,
-        fileName: req.body.filename,
-        tags: ["tag1", "tag2"],
-      })
-      .then(async (result) => {
-        await User.findByIdAndUpdate(userId, { avatar: result.url });
-        return res.status(200).json("Profile Updated Successfully");
-      })
-      .catch((error) => {
-        console.error(error);
-        res.status(500).json({ error: "Upload failed" });
-      });
+    await User.findByIdAndUpdate(userId, { avatar: avatarUrl });
+    res.status(200).json("Profile Updated Successfully");
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Upload failed" });
@@ -240,6 +229,22 @@ app.post("/auth/register", async (req, res) => {
     res.status(201).json({ message: "user added" });
   } catch (e) {
     res.status(500).json({ message: "error while creating a account" });
+  }
+});
+app.get("/profileAvatar", async (req, res) => {
+  try {
+    imagekit
+      .listFiles()
+      .then((result) => {
+        const avatar = [];
+        result.map((data) => {
+          avatar.push(data.thumbnail);
+        });
+        res.status(200).json(avatar);
+      })
+      .catch((error) => res.status(400).json("error while fetching avatar"));
+  } catch (e) {
+    res.status(400).json(e);
   }
 });
 
