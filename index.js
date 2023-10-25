@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const cors = require("cors");
+const ImageKit = require("imagekit");
 app.use(cors());
 app.use(express.json());
 const bcrypt = require("bcrypt");
@@ -10,7 +11,14 @@ const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const CreateReview = require("./models/reviewSchema");
 const CreateInterview = require("./models/interviewSchema");
+var fs = require("fs");
 require("dotenv").config();
+const imagekit = new ImageKit({
+  urlEndpoint: "https://ik.imagekit.io/b32h240hi",
+  publicKey: "public_xWxPKWl6GZQqbQyFgoMtvTzHn6I=",
+  privateKey: "private_fxYV8z1QHjot3BEoPRWA2EkBNw4=",
+});
+
 mongoose
   .connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
@@ -134,14 +142,24 @@ app.get("/get-userlogin", verifytoken, async (req, res) => {
 });
 app.post("/profileUpdate", verifytoken, async (req, res) => {
   const userId = req.userId;
-  const { data } = req.body;
-
   try {
-    await User.findByIdAndUpdate(userId, { avatar: data });
-    return res.status(200).json("Profile Updated Successfully");
+    imagekit
+      .upload({
+        file: req.body.data,
+        fileName: req.body.filename,
+        tags: ["tag1", "tag2"],
+      })
+      .then(async (result) => {
+        await User.findByIdAndUpdate(userId, { avatar: result.url });
+        return res.status(200).json("Profile Updated Successfully");
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).json({ error: "Upload failed" });
+      });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Upload failed" });
   }
 });
 
